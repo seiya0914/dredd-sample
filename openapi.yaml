@@ -28,10 +28,51 @@ paths:
                   name: "Sample Item"
                   description: "A sample item description"
                   createdAt: "2023-01-01T10:00:00Z"
+    post:
+      summary: Create a new item
+      operationId: create_item
+      requestBody:
+        description: New item data
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ItemCreate'
+            example:
+              name: "New Item Name"
+              description: "Optional description for the new item"
+      responses:
+        '201':
+          description: Item created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Item'
+              example:
+                id: 2 # Example ID, actual will vary
+                name: "New Item Name"
+                description: "Optional description for the new item"
+                createdAt: "2023-01-02T11:00:00Z" # Example timestamp
+        # Add other potential responses like 400 Bad Request later if needed
 
 components:
   schemas:
     # ItemBase removed as it's merged into Item using allOf (which caused warnings)
+    ItemCreate:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          minLength: 1       # Added validation
+          maxLength: 100     # Added validation
+          example: "New Item Name"
+        description:
+          type: string
+          maxLength: 500     # Added validation
+          nullable: true
+          example: "Optional item description"
     Item:
       type: object
       required:
@@ -41,16 +82,21 @@ components:
       properties:
         id:
           type: integer
+          minimum: 1         # Added validation
           example: 1
         name:
           type: string
+          minLength: 1       # Added validation
+          maxLength: 100     # Added validation
           example: "Sample Item Name"
         description:
           type: string
+          maxLength: 500     # Added validation
           nullable: true
           example: "Optional item description"
         createdAt:
           type: string
+          format: date-time  # Added standard format
           example: "2023-01-01T12:00:00Z"
 
 # Root tags section removed to address warning
