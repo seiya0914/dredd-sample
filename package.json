@@ -4,10 +4,11 @@
   "description": "Dredd API testing sample",
   "main": "server.js",
   "scripts": {
-    "test": "dredd openapi.yaml http://localhost:3000",
+    "test": "dredd openapi.yaml http://localhost:3000 --hooks=hooks.js",
     "start": "node server.js"
   },
   "devDependencies": {
-    "dredd": "^14.1.0"
+    "dredd": "^14.1.0",
+    "node-fetch": "^3.3.2"
   }
 }
