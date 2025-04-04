@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "test": "dredd openapi.yaml http://localhost:3000 --hooks=hooks.js --loglevel=error",
-    "start": "node server.js"
+    "start": "node server.js",
+    "dev": "python3 -m uvicorn main:app --reload --port 3000"
   },
   "devDependencies": {
     "dredd": "^14.1.0",
