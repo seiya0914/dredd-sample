@@ -4,7 +4,7 @@
   "description": "Dredd API testing sample",
   "main": "server.js",
   "scripts": {
-    "test": "dredd openapi.yaml http://localhost:3000 --hooks=hooks.js -r html -o dredd-report.html",
+    "test": "dredd openapi.yaml http://localhost:3000 --hooks=hooks.js",
     "start": "node server.js"
   },
   "devDependencies": {
