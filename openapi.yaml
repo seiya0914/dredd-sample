@@ -187,40 +187,6 @@ paths:
                     type: string
                     example: OK
 
-  /ping:
-    get:
-      summary: Simple ping endpoint
-      tags: [Utility]
-      responses:
-        '200':
-          description: Pong response.
-          content:
-            text/plain:
-              schema:
-                type: string
-                example: pong
-
-  /config:
-    get:
-      summary: Get application configuration
-      tags: [Admin]
-      responses:
-        '200':
-          description: Application configuration details.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  featureFlags:
-                    type: object
-                  logLevel:
-                    type: string
-        '401':
-          description: Unauthorized access.
-        '403':
-          description: Forbidden access (e.g., not an admin).
-
 components:
   schemas:
     Item:

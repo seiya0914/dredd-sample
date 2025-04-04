@@ -11,6 +11,9 @@ app = FastAPI(
 )
 
 # --- Models based on OpenAPI schema ---
+class Status(BaseModel):
+    status: str
+
 class ItemBase(BaseModel):
     name: str = Field(..., min_length=1, max_length=100)
     description: Optional[str] = Field(None, max_length=500)
@@ -32,16 +35,6 @@ class UserCreate(UserBase):
 
 class User(UserBase):
     id: int
-
-class Config(BaseModel):
-    logLevel: str
-    featureFlags: Dict[str, bool]
-
-class Status(BaseModel):
-    status: str
-
-class Ping(BaseModel):
-    message: str
 
 # --- In-memory data stores ---
 demo_users_db: Dict[int, User] = {
@@ -68,17 +61,6 @@ initial_next_user_id = next_user_id
 async def get_status():
     """Get the status of the API."""
     return Status(status="OK")
-
-@app.get("/ping", response_model=Ping, tags=["Utility"])
-async def get_ping():
-    """Simple ping endpoint."""
-    return Ping(message="pong")
-
-@app.get("/config", response_model=Config, tags=["Configuration"])
-async def get_config():
-    """Get application configuration."""
-    # Example config
-    return Config(logLevel="info", featureFlags={"new_dashboard": True, "beta_feature": False})
 
 @app.get("/items", response_model=List[Item], tags=["Items"])
 async def get_items():
