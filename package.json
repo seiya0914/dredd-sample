@@ -8,6 +8,7 @@
     "start": "node server.js"
   },
   "devDependencies": {
+    "ajv": "^8.17.1",
     "dredd": "^14.1.0",
     "node-fetch": "^3.3.2"
   }
