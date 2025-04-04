@@ -9,6 +9,7 @@
     "dev": "python3 -m uvicorn main:app --reload --port 3000"
   },
   "devDependencies": {
+    "ajv": "^8.17.1",
     "dredd": "^14.1.0",
     "node-fetch": "^3.3.2"
   }

@@ -41,7 +41,7 @@ async def get_items(session: Session = Depends(get_session)):
 @app.post("/items", response_model=Item, status_code=status.HTTP_201_CREATED)
 async def create_item(item_in: ItemCreate, session: Session = Depends(get_session)):
     """Create a new item and save it to the database."""
-    db_item = Item.model_validate(item_in)
+    db_item = Item(**item_in.dict())
     session.add(db_item)
     session.commit()
     session.refresh(db_item)
