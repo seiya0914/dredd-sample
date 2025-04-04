@@ -1,0 +1,354 @@
+openapi: 3.0.0
+info:
+  title: Complex Sample API
+  version: 1.1.0
+  description: A more complex API with multiple resources and endpoints for Dredd testing.
+servers:
+  - url: http://localhost:3000
+    description: Local development server
+
+paths:
+  /items:
+    get:
+      summary: List all items
+      tags: [Items]
+      responses:
+        '200':
+          description: A list of items.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Item'
+    post:
+      summary: Create a new item
+      tags: [Items]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewItem'
+      responses:
+        '201':
+          description: Item created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Item'
+        '400':
+          description: Invalid input data.
+
+  /items/{itemId}:
+    get:
+      summary: Get a specific item by ID
+      tags: [Items]
+      parameters:
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: Item details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Item'
+        '404':
+          description: Item not found.
+    put:
+      summary: Update an existing item
+      tags: [Items]
+      parameters:
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewItem'
+      responses:
+        '200':
+          description: Item updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Item'
+        '400':
+          description: Invalid input data.
+        '404':
+          description: Item not found.
+    delete:
+      summary: Delete an item
+      tags: [Items]
+      parameters:
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '204':
+          description: Item deleted successfully.
+        '404':
+          description: Item not found.
+
+  /users:
+    get:
+      summary: List all users
+      tags: [Users]
+      responses:
+        '200':
+          description: A list of users.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+    post:
+      summary: Create a new user
+      tags: [Users]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  maxLength: 50
+                password:
+                  type: string
+                  minLength: 8
+      responses:
+        '201':
+          description: User created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Invalid input data (e.g., email already exists).
+
+  /users/{userId}:
+    get:
+      summary: Get a specific user by ID
+      tags: [Users]
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: User details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: User not found.
+
+  /status:
+    get:
+      summary: Get API status
+      tags: [Utility]
+      responses:
+        '200':
+          description: API is running.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: OK
+
+  /ping:
+    get:
+      summary: Simple ping endpoint
+      tags: [Utility]
+      responses:
+        '200':
+          description: Pong response.
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: pong
+
+  /login:
+    post:
+      summary: User login
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Login successful, returns auth token.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    format: uuid
+        '401':
+          description: Invalid credentials.
+
+  /config:
+    get:
+      summary: Get application configuration (example restricted endpoint)
+      tags: [Admin]
+      security:
+        - bearerAuth: [] # Indicates this endpoint requires authentication
+      responses:
+        '200':
+          description: Application configuration details.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  featureFlags:
+                    type: object
+                  logLevel:
+                    type: string
+        '401':
+          description: Unauthorized access.
+        '403':
+          description: Forbidden access (e.g., not an admin).
+
+
+components:
+  schemas:
+    Item:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: integer
+          format: int64
+          readOnly: true
+          minimum: 1
+        name:
+          type: string
+          maxLength: 100
+        description:
+          type: string
+          maxLength: 500
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+    NewItem:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          maxLength: 100
+          example: "My New Gadget"
+        description:
+          type: string
+          maxLength: 500
+          example: "Optional description"
+    User:
+      type: object
+      required:
+        - id
+        - username
+        - email
+      properties:
+        id:
+          type: integer
+          format: int64
+          readOnly: true
+          minimum: 1
+        username:
+          type: string
+          maxLength: 50
+          pattern: "^[a-zA-Z0-9_]+$"
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        fullName:
+          type: string
+          maxLength: 100
+    NewUser:
+      type: object
+      required:
+        - username
+        - email
+        - password
+      properties:
+        username:
+          type: string
+          maxLength: 50
+          pattern: "^[a-zA-Z0-9_]+$"
+          example: "johndoe"
+        email:
+          type: string
+          format: email
+          maxLength: 254
+          example: "john.doe@example.com"
+        password:
+          type: string
+          minLength: 8
+          maxLength: 100
+          format: password
+        fullName:
+          type: string
+          maxLength: 100
+          example: "John Doe"
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT # Optional, can be any format
+
+tags:
+  - name: Items
+    description: Operations related to items
+  - name: Users
+    description: Operations related to users
+  - name: Authentication
+    description: User authentication endpoints
+  - name: Utility
+    description: General utility endpoints
+  - name: Admin
+    description: Administrative endpoints
