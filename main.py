@@ -28,18 +28,10 @@ class UserBase(BaseModel):
     fullName: Optional[str] = Field(None, max_length=100)
 
 class UserCreate(UserBase):
-    password: str = Field(..., min_length=8, max_length=100)
+    pass
 
 class User(UserBase):
     id: int
-    # password should not be exposed in responses
-
-class LoginRequest(BaseModel):
-    username: str
-    password: str
-
-class LoginResponse(BaseModel):
-    token: str
 
 class Config(BaseModel):
     logLevel: str
@@ -56,11 +48,6 @@ demo_users_db: Dict[int, User] = {
     1: User(id=1, username="admin", email="admin@example.com", fullName="Administrator"),
     2: User(id=2, username="testuser", email="test@example.com", fullName="Test User")
 }
-# WARNING: Storing plain text passwords is insecure. Use hashing in a real application.
-demo_passwords = {
-    1: "adminpass",
-    2: "testpass"
-}
 
 demo_items_db: Dict[int, Item] = {
     1: Item(id=1, name='Default Item 1', description='Description 1', createdAt=datetime.now()),
@@ -72,22 +59,8 @@ next_user_id = 3
 # --- Initial State for Reset ---
 initial_items_db = copy.deepcopy(demo_items_db)
 initial_users_db = copy.deepcopy(demo_users_db)
-initial_passwords = copy.deepcopy(demo_passwords)
 initial_next_item_id = next_item_id
 initial_next_user_id = next_user_id
-
-# --- Authentication --- (Placeholder - use proper JWT/OAuth2 in real app)
-def verify_token(authorization: Optional[str] = Header(None)) -> bool:
-    if authorization is None or not authorization.startswith("Bearer "):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized")
-    token = authorization.split(" ")[1]
-    # Simple check: if token is 'valid-token', allow access. Forbid otherwise.
-    if token == "valid-token":
-        return True
-    elif token == "forbidden-token": # Example for 403
-         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
-    else:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized")
 
 # --- Endpoints --- #
 
@@ -101,22 +74,9 @@ async def get_ping():
     """Simple ping endpoint."""
     return Ping(message="pong")
 
-@app.post("/login", response_model=LoginResponse, tags=["Authentication"])
-async def login(login_data: LoginRequest):
-    """Authenticate user and return a token."""
-    for user_id, user in demo_users_db.items():
-        if user.username == login_data.username and demo_passwords.get(user_id) == login_data.password:
-            # In a real app, generate a proper JWT token
-            return LoginResponse(token="valid-token")
-    # Check for bad request (missing fields handled by Pydantic)
-    if not login_data.username or not login_data.password:
-         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Username and password required")
-
-    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
-
-@app.get("/config", response_model=Config, tags=["Configuration"], dependencies=[Depends(verify_token)])
+@app.get("/config", response_model=Config, tags=["Configuration"])
 async def get_config():
-    """Get application configuration (requires authentication)."""
+    """Get application configuration."""
     # Example config
     return Config(logLevel="info", featureFlags={"new_dashboard": True, "beta_feature": False})
 
@@ -175,7 +135,7 @@ async def create_user(user: UserCreate):
     """Create a new user."""
     global next_user_id
     # Basic validation (more needed in real app, e.g., email format, unique username)
-    if not user.username or not user.password or not user.email:
+    if not user.username or not user.email:
          raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid input data")
     # Check if username or email already exists
     for existing_user in demo_users_db.values():
@@ -184,10 +144,9 @@ async def create_user(user: UserCreate):
         if existing_user.email == user.email:
              raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already exists")
 
-    new_user_data = user.model_dump(exclude={'password'})
+    new_user_data = user.model_dump()
     new_user = User(id=next_user_id, **new_user_data)
     demo_users_db[next_user_id] = new_user
-    demo_passwords[next_user_id] = user.password # Store password (INSECURE)
     next_user_id += 1
     return new_user
 
@@ -199,17 +158,14 @@ async def get_user(user_id: int):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     return user
 
-# Note: PUT and DELETE for users are not implemented as per the original server.js scope
-
 # --- Debug Endpoint ---
 @app.post("/debug/reset", status_code=status.HTTP_204_NO_CONTENT, tags=["Debug"])
 async def reset_state():
     """Resets the in-memory data stores to their initial state."""
-    global demo_items_db, demo_users_db, demo_passwords, next_item_id, next_user_id
+    global demo_items_db, demo_users_db, next_item_id, next_user_id
     print("Resetting server state...")
     demo_items_db = copy.deepcopy(initial_items_db)
     demo_users_db = copy.deepcopy(initial_users_db)
-    demo_passwords = copy.deepcopy(initial_passwords)
     next_item_id = initial_next_item_id
     next_user_id = initial_next_user_id
     print(f"State reset. Items: {len(demo_items_db)}, Users: {len(demo_users_db)}")

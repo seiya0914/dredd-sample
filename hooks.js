@@ -24,15 +24,15 @@ hooks.beforeEach(async (transaction, done) => {
     done(); // Proceed with the test
 });
 
-// Hook to add Authorization header for /config endpoint
-hooks.before('/config > GET', (transaction, done) => {
-    console.log('Adding Auth header for /config GET');
-    // Add Authorization header only if it doesn't exist
-    if (!transaction.request.headers['Authorization']) {
-        transaction.request.headers['Authorization'] = 'Bearer valid-token';
-    }
-    done();
-});
+// Hook to add Authorization header for /config endpoint - REMOVED as auth is removed
+// hooks.before('/config > GET', (transaction, done) => {
+//     console.log('Adding Auth header for /config GET');
+//     // Add Authorization header only if it doesn't exist
+//     if (!transaction.request.headers['Authorization']) {
+//         transaction.request.headers['Authorization'] = 'Bearer valid-token';
+//     }
+//     done();
+// });
 
 // Example Hook for forcing a 400 on POST /items
 // hooks.before('/items > POST > 400', (transaction, done) => {

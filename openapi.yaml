@@ -200,41 +200,10 @@ paths:
                 type: string
                 example: pong
 
-  /login:
-    post:
-      summary: User login
-      tags: [Authentication]
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                username:
-                  type: string
-                password:
-                  type: string
-      responses:
-        '200':
-          description: Login successful, returns auth token.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  token:
-                    type: string
-                    format: uuid
-        '401':
-          description: Invalid credentials.
-
   /config:
     get:
-      summary: Get application configuration (example restricted endpoint)
+      summary: Get application configuration
       tags: [Admin]
-      security:
-        - bearerAuth: [] # Indicates this endpoint requires authentication
       responses:
         '200':
           description: Application configuration details.
@@ -251,7 +220,6 @@ paths:
           description: Unauthorized access.
         '403':
           description: Forbidden access (e.g., not an admin).
-
 
 components:
   schemas:
@@ -312,46 +280,12 @@ components:
         fullName:
           type: string
           maxLength: 100
-    NewUser:
-      type: object
-      required:
-        - username
-        - email
-        - password
-      properties:
-        username:
-          type: string
-          maxLength: 50
-          pattern: "^[a-zA-Z0-9_]+$"
-          example: "johndoe"
-        email:
-          type: string
-          format: email
-          maxLength: 254
-          example: "john.doe@example.com"
-        password:
-          type: string
-          minLength: 8
-          maxLength: 100
-          format: password
-        fullName:
-          type: string
-          maxLength: 100
-          example: "John Doe"
-
-  securitySchemes:
-    bearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT # Optional, can be any format
 
 tags:
   - name: Items
     description: Operations related to items
   - name: Users
     description: Operations related to users
-  - name: Authentication
-    description: User authentication endpoints
   - name: Utility
     description: General utility endpoints
   - name: Admin
