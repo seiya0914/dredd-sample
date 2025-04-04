@@ -1,7 +1,8 @@
-from fastapi import FastAPI, HTTPException, status, Depends, Body, Header
+from fastapi import FastAPI, HTTPException, status, Depends, Body, Header, Response
 from pydantic import BaseModel, Field
 from typing import List, Optional, Dict
 from datetime import datetime
+import copy # Import copy for deep copies
 
 app = FastAPI(
     title="Sample API for Dredd Testing",
@@ -67,6 +68,13 @@ demo_items_db: Dict[int, Item] = {
 }
 next_item_id = 3
 next_user_id = 3
+
+# --- Initial State for Reset ---
+initial_items_db = copy.deepcopy(demo_items_db)
+initial_users_db = copy.deepcopy(demo_users_db)
+initial_passwords = copy.deepcopy(demo_passwords)
+initial_next_item_id = next_item_id
+initial_next_user_id = next_user_id
 
 # --- Authentication --- (Placeholder - use proper JWT/OAuth2 in real app)
 def verify_token(authorization: Optional[str] = Header(None)) -> bool:
@@ -155,7 +163,7 @@ async def delete_item(item_id: int):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Item not found")
     del demo_items_db[item_id]
     # Return No Content, FastAPI handles empty body for 204
-    return None # Or return Response(status_code=status.HTTP_204_NO_CONTENT)
+    return Response(status_code=status.HTTP_204_NO_CONTENT) # Explicitly return Response
 
 @app.get("/users", response_model=List[User], tags=["Users"])
 async def get_users():
@@ -193,7 +201,21 @@ async def get_user(user_id: int):
 
 # Note: PUT and DELETE for users are not implemented as per the original server.js scope
 
+# --- Debug Endpoint ---
+@app.post("/debug/reset", status_code=status.HTTP_204_NO_CONTENT, tags=["Debug"])
+async def reset_state():
+    """Resets the in-memory data stores to their initial state."""
+    global demo_items_db, demo_users_db, demo_passwords, next_item_id, next_user_id
+    print("Resetting server state...")
+    demo_items_db = copy.deepcopy(initial_items_db)
+    demo_users_db = copy.deepcopy(initial_users_db)
+    demo_passwords = copy.deepcopy(initial_passwords)
+    next_item_id = initial_next_item_id
+    next_user_id = initial_next_user_id
+    print(f"State reset. Items: {len(demo_items_db)}, Users: {len(demo_users_db)}")
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=3000)
-
