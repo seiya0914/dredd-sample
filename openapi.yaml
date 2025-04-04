@@ -52,6 +52,7 @@ paths:
             type: integer
             format: int64
             minimum: 1
+          example: 1
       responses:
         '200':
           description: Item details.
@@ -72,6 +73,7 @@ paths:
             type: integer
             format: int64
             minimum: 1
+          example: 1
       requestBody:
         required: true
         content:
@@ -100,6 +102,7 @@ paths:
             type: integer
             format: int64
             minimum: 1
+          example: 1
       responses:
         '204':
           description: Item deleted successfully.
@@ -157,6 +160,7 @@ paths:
             type: integer
             format: int64
             minimum: 1
+          example: 1
       responses:
         '200':
           description: User details.
