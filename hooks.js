@@ -24,31 +24,41 @@ hooks.beforeEach(async (transaction, done) => {
     done(); // Proceed with the test
 });
 
-// Hook to add Authorization header for /config endpoint - REMOVED as auth is removed
-// hooks.before('/config > GET', (transaction, done) => {
-//     console.log('Adding Auth header for /config GET');
-//     // Add Authorization header only if it doesn't exist
-//     if (!transaction.request.headers['Authorization']) {
-//         transaction.request.headers['Authorization'] = 'Bearer valid-token';
-//     }
-//     done();
-// });
+// Hook to modify request for POST /items > 400 test
+hooks.before('Items > /items > POST > 400', (transaction, done) => {
+  console.log('Modifying request for POST /items 400');
+  transaction.request.body = JSON.stringify({ name: "" }); // Invalid name
+  transaction.request.headers['Content-Type'] = 'application/json';
+  done();
+});
 
-// Example Hook for forcing a 400 on POST /items
-// hooks.before('/items > POST > 400', (transaction, done) => {
-//     console.log('Modifying request for POST /items 400');
-//     // Intentionally make the payload invalid (e.g., remove required 'name')
-//     transaction.request.body = JSON.stringify({ description: "Invalid item" });
-//     transaction.request.headers['Content-Type'] = 'application/json';
-//     done();
-// });
+// Hook to modify request for PUT /items/{itemId} > 400 test
+hooks.before('Items > /items/{itemId} > PUT > 400', (transaction, done) => {
+  console.log('Modifying request for PUT /items/{itemId} 400');
+  transaction.request.body = JSON.stringify({ name: "" }); // Invalid name
+  transaction.request.headers['Content-Type'] = 'application/json';
+  done();
+});
 
-// Example Hook for forcing a 404 on GET /items/{itemId}
-// hooks.before('/items/{itemId} > GET > 404', (transaction, done) => {
-//     console.log('Modifying request for GET /items/{itemId} 404');
-//     // Replace the path parameter with a non-existent ID
-//     transaction.fullPath = transaction.fullPath.replace('/items/1', '/items/99999');
-//     done();
-// });
+// Hook to modify request for GET /items/{itemId} > 404 test
+hooks.before('Items > /items/{itemId} > GET > 404', (transaction, done) => {
+  console.log('Modifying request for GET /items/{itemId} 404');
+  transaction.fullPath = '/items/99999'; // Non-existent ID
+  done();
+});
+
+// Hook to modify request for PUT /items/{itemId} > 404 test
+hooks.before('Items > /items/{itemId} > PUT > 404', (transaction, done) => {
+  console.log('Modifying request for PUT /items/{itemId} 404');
+  transaction.fullPath = '/items/99999'; // Non-existent ID
+  done();
+});
+
+// Hook to modify request for GET /users/{userId} > 404 test
+hooks.before('Users > /users/{userId} > GET > 404', (transaction, done) => {
+  console.log('Modifying request for GET /users/{userId} 404');
+  transaction.fullPath = '/users/99999'; // Non-existent ID
+  done();
+});
 
 // Add more hooks here for other specific test cases as needed

@@ -138,6 +138,13 @@ paths:
                 password:
                   type: string
                   minLength: 8
+              examples: 
+                validUser:
+                  summary: Example of a valid user creation request
+                  value:
+                    username: "newuser"
+                    email: "newuser@example.com"
+                    fullName: "New User Name"
       responses:
         '201':
           description: User created successfully.
