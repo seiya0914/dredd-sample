@@ -75,6 +75,7 @@ components:
           example: "Optional item description"
     Item:
       type: object
+      additionalProperties: false # Ensure this is set
       required:
         - id
         - name

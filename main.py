@@ -32,11 +32,22 @@ def get_session():
     with Session(engine) as session:
         yield session
 
-@app.get("/items", response_model=List[Item])
+@app.get("/items")
 async def get_items(session: Session = Depends(get_session)):
-    """Get a list of all items from the database."""
+    """Get a list of all items (with an extra field for testing)."""
     items = session.exec(select(Item)).all()
-    return items
+    # Manually add an extra field not defined in the OpenAPI spec
+    items_with_extra = [
+        {
+            "id": item.id,
+            "name": item.name,
+            "description": item.description,
+            "createdAt": item.createdAt.isoformat() + "Z", # Ensure ISO format with Z
+            "extra_field": "this_field_should_cause_failure"
+        }
+        for item in items
+    ]
+    return items_with_extra
 
 @app.post("/items", response_model=Item, status_code=status.HTTP_201_CREATED)
 async def create_item(item_in: ItemCreate, session: Session = Depends(get_session)):
